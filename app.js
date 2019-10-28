@@ -7,53 +7,62 @@ app.use(morgan('dev'));
 app.listen(8000, () => { });
 
 app.get('/sum', (req, res) => {
-	const a = req.query.a;
-	const b = req.query.b;
+  const a = req.query.a;
+  const b = req.query.b;
 
-	const x = Number(a);
-	const y = Number(b);
+  const x = Number(a);
+  const y = Number(b);
 
-	const sum = x + y;
+  const sum = x + y;
 
-	if(!a || !b) {
-		return res.status(400).send('Please provide a query');
-	}
-	if(!x || !y) {
-		return res.status(400).send('Queries must be numbers');
-	}
-	res.send(`The sum of ${a} and ${b} is ${sum}`);
+  if(!a || !b) {
+    return res.status(400).send('Please provide a query');
+  }
+  if(!x || !y) {
+    return res.status(400).send('Queries must be numbers');
+  }
+  res.send(`The sum of ${a} and ${b} is ${sum}`);
 });
 
 app.get('/cipher', (req, res) => {
-	const text = req.query.text;
-	const shift = req.query.shift;
+  const text = req.query.text;
+  const shift = parseInt(req.query.shift);
 
-	if (!parseInt(shift)) {
-		return res.status(400).send('Shift must be an integer');
-	}
+  if (!text) {
+    return res.status(400).send('Please provide a text query');
+  }
 
-	let result = '';
-	for (let i = 0; i < text.length; i++) {
-		const input = text.charCodeAt(i);
-		let alpha;
+  if(shift > 25){
+    return res.status(400).send('Please provide a shift value (integer), or an integer less than 26');
+  }
+	
+  let newString = '';
 
-		if (input <= 90) {
-			alpha = 'upper';
-		}
-		else if (input >= 97) {
-			alpha = 'lower';
-		}
-
-		let code = (text.charCodeAt(i) + shift);
-		if (code > 90 && alpha === 'upper') {
-			code -= 26;
-		}
-		else if (code > 122 && alpha === 'lower') {
-			code -= 26;
-		}
-
-		result += String.fromCharCode(code);
-	};
-
-	res.send(result);
-})
+  for (let i = 0; i < text.length; i++){
+    const currCharCode = text.charCodeAt(i);
+    if ( (text.charCodeAt(i) >= 65 && text.charCodeAt(i) <= 90) ){
+      if (currCharCode + shift > 90 ) {
+        let overShift = currCharCode + shift - 90;
+        newString += String.fromCharCode(65 + overShift - 1);
+      } else if (currCharCode + shift < 65 ){
+        let overShift = currCharCode + shift - 65;
+        newString += String.fromCharCode(90 + overShift + 1);
+      } else {
+        newString += String.fromCharCode(currCharCode + shift);
+      }
+    } else if ( (text.charCodeAt(i) >= 97 && text.charCodeAt(i) <= 122) ){
+      if (currCharCode + shift > 122 ) {
+        let overShift = currCharCode + shift - 122;
+        newString += String.fromCharCode(97 + overShift - 1);
+      } else if (currCharCode + shift < 97 ){
+        let overShift = currCharCode + shift - 97;
+        newString += String.fromCharCode(122 + overShift + 1);
+      } else {
+        newString += String.fromCharCode(currCharCode + shift);
+      }
+    } else {
+      newString += String.fromCharCode(currCharCode);
+    }
+  }
+  res.status(200).send(newString);
+});
