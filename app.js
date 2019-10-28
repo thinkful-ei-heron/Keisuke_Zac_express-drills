@@ -66,3 +66,36 @@ app.get('/cipher', (req, res) => {
   }
   res.status(200).send(newString);
 });
+
+app.get('/lotto', (req, res) => {
+  let userArray = req.query.arr;
+  let lottoArray = Array.from( {length: 6}, () => Math.floor(Math.random()*20 + 1));
+  let matchNumber = 0;
+
+  if (!Array.isArray(userArray)){
+    return res.status(400).send('Please provide an array in the query');
+  }
+
+  for (let i = 0; i < userArray.length; i++){
+    if (userArray.includes(lottoArray[i])){
+      matchNumber++;
+    }
+  }
+
+  let displayString = `Your numbers were ${userArray.join('-')}. The lotto numbers were ${lottoArray.join('-')}.`;
+
+  switch(matchNumber){
+  case 6:
+    res.status(200).send(`${displayString} Wow! Unbelievable! You could have won the mega millions!`);
+    break;
+  case 5:
+    res.status(200).send(`${displayString} Congratulations! You win $100!`);
+    break;
+  case 4:
+    res.status(200).send(`${displayString} Congratulations, you win a free ticket!`);
+    break;
+  default: 
+    res.status(200).send(`${displayString} Sorry, you lose.`);
+  }
+});
+
